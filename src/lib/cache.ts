@@ -1,23 +1,44 @@
+/* eslint-disable no-await-in-loop */
 /**
  * Util methods for file manipulations in cache folder of App Data
  */
-import type { FileEntry } from '@tauri-apps/api/fs';
-import { readBinaryFile, readDir, writeBinaryFile } from '@tauri-apps/api/fs';
-import { BaseDirectory, sep } from '@tauri-apps/api/path';
+import { BaseDirectory, join, sep } from '@tauri-apps/api/path';
+import type { DirEntry } from '@tauri-apps/plugin-fs';
+import { readDir, readFile, writeFile } from '@tauri-apps/plugin-fs';
 
 const BASE_PATH = `cache${sep}`;
+
+async function processEntriesRecursively(
+  files: DirEntry[],
+  parent: string,
+  entries: DirEntry[]
+) {
+  for (const entry of entries) {
+    const dir = await join(parent, entry.name);
+    if (entry.isDirectory) {
+      processEntriesRecursively(
+        files,
+        dir,
+        await readDir(dir, { baseDir: BaseDirectory.AppLocalData })
+      );
+    } else {
+      files.push(entry);
+    }
+  }
+}
 
 /**
  * List all files in a directory
  * @param recursive whether to list subdirectories
- * @returns file entries as FileEntry[]
+ * @returns file entries as DirEntry[]
  */
-async function list(recursive: boolean = false): Promise<FileEntry[]> {
+async function list(): Promise<DirEntry[]> {
   const entries = await readDir(BASE_PATH, {
-    dir: BaseDirectory.AppData,
-    recursive,
+    baseDir: BaseDirectory.AppData,
   });
-  return entries;
+  const files: DirEntry[] = [];
+  processEntriesRecursively(files, BASE_PATH, entries);
+  return files;
 }
 
 /**
@@ -26,8 +47,8 @@ async function list(recursive: boolean = false): Promise<FileEntry[]> {
  * @param data binary data as Uint8Array
  */
 async function write(fileName: string, data: Uint8Array) {
-  await writeBinaryFile(`${BASE_PATH}${fileName}`, data, {
-    dir: BaseDirectory.AppData,
+  await writeFile(`${BASE_PATH}${fileName}`, data, {
+    baseDir: BaseDirectory.AppData,
   });
 }
 
@@ -37,8 +58,8 @@ async function write(fileName: string, data: Uint8Array) {
  * @returns
  */
 async function read(fileName: string): Promise<Uint8Array> {
-  const data = await readBinaryFile(`${BASE_PATH}${fileName}`, {
-    dir: BaseDirectory.AppData,
+  const data = await readFile(`${BASE_PATH}${fileName}`, {
+    baseDir: BaseDirectory.AppData,
   });
   return data;
 }

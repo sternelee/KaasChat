@@ -5,13 +5,16 @@ mod commands;
 mod core;
 mod errors;
 mod init;
-mod services;
 mod log_utils;
+mod services;
 
 use chrono::Local;
 use log::LevelFilter;
 use tauri::Manager;
-use tauri_plugin_log::{fern::colors::{Color, ColoredLevelConfig}, LogTarget};
+use tauri_plugin_log::{
+    fern::colors::{Color, ColoredLevelConfig},
+    LogTarget,
+};
 
 fn main() {
     let colors = ColoredLevelConfig {
@@ -22,6 +25,11 @@ fn main() {
         trace: Color::White,
     };
     tauri::Builder::default()
+        .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_clipboard_manager::init())
+        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             commands::create_model,
             commands::list_models,
