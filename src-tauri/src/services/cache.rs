@@ -1,7 +1,7 @@
 use base64::{engine::general_purpose::STANDARD, Engine as _};
 use infer;
+use tauri::Manager;
 use std::{io::Read, path::PathBuf};
-use tauri::api::path::app_data_dir;
 
 use crate::core::handle::Handle;
 
@@ -42,7 +42,7 @@ pub fn get_cache_dir() -> Result<PathBuf, String> {
         .clone()
         .expect("App handle is not initialized");
     // get app data path
-    let mut cache_dir = app_data_dir(&app_handle.config()).ok_or("App data path does't exist!")?;
+    let mut cache_dir = app_handle.path().app_data_dir().expect("App data path does't exist!");
     cache_dir.push("cache");
-    return Ok(cache_dir);
+    Ok(cache_dir)
 }

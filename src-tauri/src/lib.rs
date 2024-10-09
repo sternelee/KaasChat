@@ -12,7 +12,7 @@ use log::LevelFilter;
 use tauri::Manager;
 use tauri_plugin_log::{
     fern::colors::{Color, ColoredLevelConfig},
-    LogTarget,
+    Target, TargetKind,
 };
 
 pub fn run() {
@@ -61,7 +61,7 @@ pub fn run() {
         ])
         .plugin(
             tauri_plugin_log::Builder::default()
-                .targets([LogTarget::Stdout, LogTarget::Webview])
+                .targets([Target::new(TargetKind::Stdout), Target::new(TargetKind::Webview)])
                 .level(LevelFilter::Debug)
                 .format(move |out, message, record| {
                     out.finish(format_args!(
@@ -78,7 +78,7 @@ pub fn run() {
             // Open dev tools in debug builds
             #[cfg(debug_assertions)]
             {
-                let window = app.get_window("main").unwrap();
+                let window = app.get_webview_window("main").unwrap();
                 window.open_devtools();
             }
             // Initialization

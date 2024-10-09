@@ -6,7 +6,6 @@ use crate::services::db::Repository;
 use crate::services::llm::utils::convert_locale_region_to_script;
 use entity::entities::settings::Model as Setting;
 use entity::entities::settings::SETTING_DISPLAY_LANGUAGE;
-use tauri::api::path::app_data_dir;
 use tauri::{App, Manager};
 
 pub fn init(app: &App) -> Result<(), String> {
@@ -24,14 +23,14 @@ pub fn init(app: &App) -> Result<(), String> {
 
 // Initialize the wrapper of app handle
 fn init_handle(app: &App) -> Result<(), String> {
-    Handle::global().init(app.handle());
+    Handle::global().init(app.handle().clone());
     Ok(())
 }
 
 // Initialize the database repository & migrate
 fn init_db(app: &App) -> Result<(), String> {
     // get app data path
-    let _app_data_dir = app_data_dir(&*app.config()).expect("App data path does't exist!");
+    let _app_data_dir = app.handle().path().app_data_dir().expect("App data path does't exist!");
     let app_data_dir_str = _app_data_dir
         .to_str()
         .expect("App data path is not a valid string!")
@@ -69,7 +68,7 @@ fn init_db(app: &App) -> Result<(), String> {
 // Initialize the cache dir for files such as images, pdfs, etc.
 fn init_cache_dir(app: &App) -> Result<(), String> {
     // get app data path
-    let mut cache_dir = app_data_dir(&*app.config()).expect("App data path does't exist!");
+    let mut cache_dir = app.handle().path().app_data_dir().expect("App data path does't exist!");
     cache_dir.push("cache");
     let cache_dir_str = cache_dir
         .to_str()

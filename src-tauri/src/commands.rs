@@ -19,6 +19,8 @@ use serde_json::json;
 use sysinfo::System;
 
 use tauri::State;
+use tauri::Listener;
+use tauri::Emitter;
 use tokio_stream::StreamExt;
 
 use crate::{
