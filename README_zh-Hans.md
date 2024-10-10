@@ -106,3 +106,6 @@ pnpm tauri dev
 [en-icon]: https://img.shields.io/badge/English-teal?style=flat-square
 [zh-hans-icon]: https://img.shields.io/badge/%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-teal?style=flat-square
 
+# 移动端需要修复的一些问题
+
+[Tauri 2.0 cannot build target android](https://github.com/tauri-apps/tauri/issues/9582)
