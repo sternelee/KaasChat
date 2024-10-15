@@ -108,5 +108,5 @@ pnpm tauri dev
 
 # 移动端需要修复的一些问题
 
-[Tauri 2.0 cannot build target android](https://github.com/tauri-apps/tauri/issues/9582)
-[使用 java 21] `brew install openjdk@21`
+[Tauri 2.0 cannot build target android]: https://github.com/tauri-apps/tauri/issues/9582
+[使用 java 21]: `brew install openjdk@21`
