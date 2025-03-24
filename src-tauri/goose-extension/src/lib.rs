@@ -1,4 +1,3 @@
-mod config;
 mod prompt_template;
 use anyhow::Result;
 use chrono::{DateTime, TimeZone, Utc};
@@ -12,6 +11,7 @@ use std::time::Duration;
 use tokio::sync::Mutex;
 use tracing::{debug, instrument};
 pub mod mcp;
+pub mod config;
 
 use config::{
     ExtensionConfig, ExtensionError, ExtensionInfo, ExtensionResult, DEFAULT_EXTENSION_TIMEOUT,

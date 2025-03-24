@@ -8,6 +8,7 @@ use entity::entities::{
     models::{GenericConfig, Providers},
     settings::ProxySetting,
 };
+use mcp_core::Tool;
 use reqwest;
 
 use super::{
@@ -104,15 +105,16 @@ impl LLMClient {
         options: GenericOptions,
         global_settings: GlobalSettings,
         model: &'c Option<String>,
+        tools: Vec<Tool>,
         executor: F,
     ) -> Result<BotReply, String>
     where
-        F: FnOnce(&'c Client<C>, Vec<MessageDTO>, GenericOptions, GlobalSettings, String) -> Result<ChatRequestExecutor<'c>, String>,
+        F: FnOnce(&'c Client<C>, Vec<MessageDTO>, GenericOptions, GlobalSettings, String, Vec<Tool>) -> Result<ChatRequestExecutor<'c>, String>,
         C: Config,
     {
         match model {
             Some(model_str) => {
-                let reply = executor(client, messages, options, global_settings, model_str.to_string())?
+                let reply = executor(client, messages, options, global_settings, model_str.to_string(), tools)?
                     .execute()
                     .await?;
                 Ok(reply)
@@ -127,15 +129,16 @@ impl LLMClient {
         options: GenericOptions,
         global_settings: GlobalSettings,
         model: &'c Option<String>,
+        tools: Vec<Tool>,
         executor: F,
     ) -> Result<BotReplyStream, String>
     where
-        F: FnOnce(&'c Client<C>, Vec<MessageDTO>, GenericOptions, GlobalSettings, String) -> Result<ChatRequestExecutor<'c>, String>,
+        F: FnOnce(&'c Client<C>, Vec<MessageDTO>, GenericOptions, GlobalSettings, String, Vec<Tool>) -> Result<ChatRequestExecutor<'c>, String>,
         C: Config,
     {
         match model {
             Some(model_str) => {
-                let stream = executor(client, messages, options, global_settings, model_str.to_string())?
+                let stream = executor(client, messages, options, global_settings, model_str.to_string(), tools)?
                     .execute_stream()
                     .await?;
                 Ok(stream)
@@ -149,31 +152,32 @@ impl LLMClient {
         messages: Vec<MessageDTO>,
         options: GenericOptions,
         global_settings: GlobalSettings,
+        tools: Vec<Tool>,
     ) -> Result<BotReply, String> {
         match self {
             LLMClient::OpenAIClient(client, model) => {
-                Self::execute_chat_request(client, messages, options, global_settings, model, ChatRequestExecutor::openai).await
+                Self::execute_chat_request(client, messages, options, global_settings, model, tools, ChatRequestExecutor::openai).await
             },
             LLMClient::AzureClient(client, model) => {
-                Self::execute_chat_request(client, messages, options, global_settings, model, ChatRequestExecutor::azure).await
+                Self::execute_chat_request(client, messages, options, global_settings, model, tools, ChatRequestExecutor::azure).await
             }
             LLMClient::ClaudeClient(client, model) => {
-                Self::execute_chat_request(client, messages, options, global_settings, model, ChatRequestExecutor::claude).await
+                Self::execute_chat_request(client, messages, options, global_settings, model, tools, ChatRequestExecutor::claude).await
             },
             LLMClient::OllamaClient(client, model) => {
-                Self::execute_chat_request(client, messages, options, global_settings, model, ChatRequestExecutor::ollama).await
+                Self::execute_chat_request(client, messages, options, global_settings, model, tools, ChatRequestExecutor::ollama).await
             },
             LLMClient::OpenrouterClient(client, model) => {
-                Self::execute_chat_request(client, messages, options, global_settings, model, ChatRequestExecutor::openrouter).await
+                Self::execute_chat_request(client, messages, options, global_settings, model, tools, ChatRequestExecutor::openrouter).await
             },
             LLMClient::DeepseekClient(client, model) => {
-                Self::execute_chat_request(client, messages, options, global_settings, model, ChatRequestExecutor::deepseek).await
+                Self::execute_chat_request(client, messages, options, global_settings, model, tools, ChatRequestExecutor::deepseek).await
             },
             LLMClient::XaiClient(client, model) => {
-                Self::execute_chat_request(client, messages, options, global_settings, model, ChatRequestExecutor::xai).await
+                Self::execute_chat_request(client, messages, options, global_settings, model, tools, ChatRequestExecutor::xai).await
             },
             LLMClient::GoogleClient(client, model) => {
-                Self::execute_chat_request(client, messages, options, global_settings, model, ChatRequestExecutor::google).await
+                Self::execute_chat_request(client, messages, options, global_settings, model, tools, ChatRequestExecutor::google).await
             },
         }
     }
@@ -183,31 +187,32 @@ impl LLMClient {
         messages: Vec<MessageDTO>,
         options: GenericOptions,
         global_settings: GlobalSettings,
+        tools: Vec<Tool>,
     ) -> Result<BotReplyStream, String> {
         match self {
             LLMClient::OpenAIClient(client, model) => {
-                Self::execute_chat_request_stream(client, messages, options, global_settings, model, ChatRequestExecutor::openai).await
+                Self::execute_chat_request_stream(client, messages, options, global_settings, model, tools, ChatRequestExecutor::openai).await
             },
             LLMClient::AzureClient(client, model) => {
-                Self::execute_chat_request_stream(client, messages, options, global_settings, model, ChatRequestExecutor::azure).await
+                Self::execute_chat_request_stream(client, messages, options, global_settings, model, tools, ChatRequestExecutor::azure).await
             }
             LLMClient::ClaudeClient(client, model) => {
-                Self::execute_chat_request_stream(client, messages, options, global_settings, model, ChatRequestExecutor::claude).await
+                Self::execute_chat_request_stream(client, messages, options, global_settings, model, tools, ChatRequestExecutor::claude).await
             },
             LLMClient::OllamaClient(client, model) => {
-                Self::execute_chat_request_stream(client, messages, options, global_settings, model, ChatRequestExecutor::ollama).await
+                Self::execute_chat_request_stream(client, messages, options, global_settings, model, tools, ChatRequestExecutor::ollama).await
             },
             LLMClient::OpenrouterClient(client, model) => {
-                Self::execute_chat_request_stream(client, messages, options, global_settings, model, ChatRequestExecutor::openrouter).await
+                Self::execute_chat_request_stream(client, messages, options, global_settings, model, tools, ChatRequestExecutor::openrouter).await
             },
             LLMClient::DeepseekClient(client, model) => {
-                Self::execute_chat_request_stream(client, messages, options, global_settings, model, ChatRequestExecutor::deepseek).await
+                Self::execute_chat_request_stream(client, messages, options, global_settings, model, tools, ChatRequestExecutor::deepseek).await
             },
             LLMClient::XaiClient(client, model) => {
-                Self::execute_chat_request_stream(client, messages, options, global_settings, model, ChatRequestExecutor::xai).await
+                Self::execute_chat_request_stream(client, messages, options, global_settings, model, tools, ChatRequestExecutor::xai).await
             },
             LLMClient::GoogleClient(client, model) => {
-                Self::execute_chat_request_stream(client, messages, options, global_settings, model, ChatRequestExecutor::google).await
+                Self::execute_chat_request_stream(client, messages, options, global_settings, model, tools, ChatRequestExecutor::google).await
             },
         }
     }

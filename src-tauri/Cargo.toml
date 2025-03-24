@@ -40,7 +40,9 @@ tauri-build = { version = "2", features = [] }
 # local crates
 entity = { path = "entity" }
 goose-extension = { path = "goose-extension" }
+mcp-core = { path = "mcp-core" }
 migration = { path = "migration" }
+indoc = "2.0.5"
 async-openai = { git = "https://github.com/0xfrankz/async-openai.git", branch = "google-compatibility" }
 chrono = "0.4.34"
 log = "0.4.20"

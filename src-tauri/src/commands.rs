@@ -18,6 +18,10 @@ use entity::entities::{
 use serde_json::json;
 use sysinfo::System;
 
+use crate::state::AppState;
+use goose_extension::config::ExtensionConfig;
+use indoc::indoc;
+use mcp_core::Tool;
 use tauri::{Emitter, Listener, State};
 use tokio_stream::StreamExt;
 
@@ -27,10 +31,12 @@ use crate::{
     services::{
         db::Repository,
         llm::{
-            chat::{BotReply, GlobalSettings}, client::LLMClient, models::RemoteModel
+            chat::{BotReply, GlobalSettings},
+            client::LLMClient,
+            models::RemoteModel,
         },
     },
-    utils::is_stream_enabled
+    utils::is_stream_enabled,
 };
 
 type CommandResult<T = ()> = Result<T, CommandError>;
@@ -375,6 +381,7 @@ pub async fn hard_delete_message(
 
 #[tauri::command]
 pub async fn call_bot(
+    state: State<'_, AppState>,
     conversation_id: i32,
     tag: String,
     before_message_id: Option<i32>,
@@ -447,6 +454,59 @@ pub async fn call_bot(
         context.insert(0, sys_m);
     }
     log::info!("bot calling context: {:?}", context);
+    // Get tools using lock() to get mutable access to capabilities
+    let mut tools = state
+        .capabilities
+        .lock()
+        .await
+        .get_prefixed_tools()
+        .await
+        .unwrap_or(vec![]);
+
+    // TODO: make sure there is no collision with another extension's tool name
+    let read_resource_tool = Tool::new(
+                    "platform__read_resource".to_string(),
+                    indoc! {r#"
+                        Read a resource from an extension.
+
+                        Resources allow extensions to share data that provide context to LLMs, such as
+                        files, database schemas, or application-specific information. This tool searches for the
+                        resource URI in the provided extension, and reads in the resource content. If no extension
+                        is provided, the tool will search all extensions for the resource.
+                    "#}.to_string(),
+                    json!({
+                        "type": "object",
+                        "required": ["uri"],
+                        "properties": {
+                            "uri": {"type": "string", "description": "Resource URI"},
+                            "extension_name": {"type": "string", "description": "Optional extension name"}
+                        }
+                    }),
+                );
+
+    let list_resources_tool = Tool::new(
+                    "platform__list_resources".to_string(),
+                    indoc! {r#"
+                        List resources from an extension(s).
+
+                        Resources allow extensions to share data that provide context to LLMs, such as
+                        files, database schemas, or application-specific information. This tool lists resources
+                        in the provided extension, and returns a list for the user to browse. If no extension
+                        is provided, the tool will search all extensions for the resource.
+                    "#}.to_string(),
+                    json!({
+                        "type": "object",
+                        "properties": {
+                            "extension_name": {"type": "string", "description": "Optional extension name"}
+                        }
+                    }),
+                );
+
+    if state.capabilities.lock().await.supports_resources() {
+        tools.push(read_resource_tool);
+        tools.push(list_resources_tool);
+    }
+
     // delegate to one-off or stream function to send request
     let is_stream_enabled = is_stream_enabled(&options);
     if is_stream_enabled {
@@ -459,6 +519,7 @@ pub async fn call_bot(
             config,
             proxy_setting,
             max_token_setting,
+            tools,
         )
         .await;
     } else {
@@ -471,6 +532,7 @@ pub async fn call_bot(
             config,
             proxy_setting,
             max_token_setting,
+            tools,
         )
         .await;
     }
@@ -548,6 +610,7 @@ async fn call_bot_one_off(
     config: GenericConfig,
     proxy_setting: Option<ProxySetting>,
     max_token_setting: u32,
+    tools: Vec<Tool>,
 ) {
     log::info!("call_bot_one_off");
     let window_clone = window.clone();
@@ -566,6 +629,7 @@ async fn call_bot_one_off(
                         GlobalSettings {
                             max_tokens: max_token_setting,
                         },
+                        tools,
                     )
                     .await;
                 match result {
@@ -611,6 +675,7 @@ async fn call_bot_stream(
     config: GenericConfig,
     proxy_setting: Option<ProxySetting>,
     max_token_setting: u32,
+    tools: Vec<Tool>,
 ) {
     let log_tag = "call_bot_stream";
     let window_clone = window.clone();
@@ -629,9 +694,10 @@ async fn call_bot_stream(
                         GlobalSettings {
                             max_tokens: max_token_setting,
                         },
+                        tools,
                     )
                     .await;
-                                match stream_result {
+                match stream_result {
                     Ok(mut stream) => {
                         // start receiving in frontend
                         emit_stream_start(&tag, &window);
@@ -735,3 +801,24 @@ fn emit_stream_data(tag: &str, window: &tauri::Window, data: BotReply) {
     let _ = window.emit(tag, data_str);
 }
 /***** Helper functions for emitting events to frontend END *****/
+
+#[tauri::command]
+pub async fn list_tools(state: State<'_, AppState>) -> CommandResult<Vec<String>> {
+    let capabilities = state.capabilities.lock().await;
+    let tools = capabilities.list_extensions().await.unwrap_or(vec![]);
+    Ok(tools)
+}
+
+#[tauri::command]
+pub async fn add_tool(state: State<'_, AppState>, tool: ExtensionConfig) -> CommandResult<()> {
+    let mut capabilities = state.capabilities.lock().await;
+    capabilities.add_extension(tool);
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn remove_tool(state: State<'_, AppState>, name: String) -> CommandResult<()> {
+    let mut capabilities = state.capabilities.lock().await;
+    capabilities.remove_extension(&name);
+    Ok(())
+}

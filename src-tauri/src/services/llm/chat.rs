@@ -11,6 +11,7 @@ use entity::entities::{
     conversations::{AzureOptions, ClaudeOptions, DeepseekOptions, GenericOptions, GoogleOptions, OllamaOptions, OpenAIOptions, XaiOptions},
     messages::MessageDTO,
 };
+use mcp_core::Tool;
 use serde::Serialize;
 use tokio_stream::{Stream, StreamExt};
 
@@ -79,6 +80,7 @@ impl<'c> ChatRequestExecutor<'c> {
         options: GenericOptions,
         global_settings: GlobalSettings,
         model: String,
+        tools: Vec<Tool>,
     ) -> Result<ChatRequestExecutor, String> {
         let request: OpenAIChatCompletionRequest;
         // set messages
@@ -100,13 +102,14 @@ impl<'c> ChatRequestExecutor<'c> {
                 stream_options: if options.stream.unwrap_or(false) {
                     // default to return usage when streaming
                     Some(ChatCompletionStreamOptions {
-                        include_usage: true
+                        include_usage: true,
                     })
                 } else {
                     None
                 },
                 temperature: options.temperature,
                 top_p: options.top_p,
+                tools: if !tools.is_empty() { Some(tools) } else { None },
                 ..Default::default()
             },
             reasoning_effort: options.reasoning_effort.map(|x| x.into()),
@@ -123,6 +126,7 @@ impl<'c> ChatRequestExecutor<'c> {
         options: GenericOptions,
         global_settings: GlobalSettings,
         _model: String,
+        tools: Vec<Tool>,
     ) -> Result<ChatRequestExecutor, String> {
         let request: OpenAIChatCompletionRequest;
         // set messages
@@ -142,6 +146,7 @@ impl<'c> ChatRequestExecutor<'c> {
                 stream: options.stream,
                 temperature: options.temperature,
                 top_p: options.top_p,
+                tools: if !tools.is_empty() { Some(tools) } else { None },
                 ..Default::default()
             },
             messages: req_messages,
@@ -157,6 +162,7 @@ impl<'c> ChatRequestExecutor<'c> {
         options: GenericOptions,
         global_settings: GlobalSettings,
         model: String,
+        tools: Vec<Tool>,
     ) -> Result<ChatRequestExecutor, String> {
         let request: ClaudeChatCompletionRequest;
         // set messages
@@ -175,6 +181,7 @@ impl<'c> ChatRequestExecutor<'c> {
                 stream: options.stream,
                 temperature: options.temperature,
                 top_p: options.top_p,
+                tools: if !tools.is_empty() { Some(tools) } else { None },
                 ..Default::default()
             },
             messages: req_messages,
@@ -190,6 +197,7 @@ impl<'c> ChatRequestExecutor<'c> {
         options: GenericOptions,
         _global_settings: GlobalSettings,
         model: String,
+        tools: Vec<Tool>,
     ) -> Result<ChatRequestExecutor, String> {
         let request: OllamaChatCompletionRequest;
         // set messages
@@ -222,6 +230,7 @@ impl<'c> ChatRequestExecutor<'c> {
         options: GenericOptions,
         global_settings: GlobalSettings,
         model: String,
+        tools: Vec<Tool>,
     ) -> Result<ChatRequestExecutor, String> {
         // set messages
         let req_messages: Vec<ChatCompletionRequestMessage> = messages
@@ -241,6 +250,7 @@ impl<'c> ChatRequestExecutor<'c> {
                 max_tokens: options.max_tokens.or(Some(global_settings.max_tokens)),
                 frequency_penalty: options.frequency_penalty,
                 presence_penalty: options.presence_penalty,
+                tools: if !tools.is_empty() { Some(tools) } else { None },
                 ..Default::default()
             },
             messages: req_messages,
@@ -256,6 +266,7 @@ impl<'c> ChatRequestExecutor<'c> {
         options: GenericOptions,
         global_settings: GlobalSettings,
         model: String,
+        tools: Vec<Tool>,
     ) -> Result<ChatRequestExecutor, String> {
         let request: DeepseekChatCompletionRequest;
         // set messages
@@ -297,6 +308,7 @@ impl<'c> ChatRequestExecutor<'c> {
         options: GenericOptions,
         global_settings: GlobalSettings,
         model: String,
+        tools: Vec<Tool>,
     ) -> Result<ChatRequestExecutor, String> {
         let request: XaiChatCompletionRequest;
         // set messages
@@ -338,6 +350,7 @@ impl<'c> ChatRequestExecutor<'c> {
         options: GenericOptions,
         global_settings: GlobalSettings,
         _model: String,
+        tools: Vec<Tool>,
     ) -> Result<ChatRequestExecutor, String> {
         let request: GoogleChatCompletionRequest;
         // set messages

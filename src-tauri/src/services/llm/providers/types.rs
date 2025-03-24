@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
+use mcp_core::Tool;
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct ChatCompletionStreamOptions {
@@ -70,6 +71,9 @@ pub struct ChatCompletionRequestCommon {
     
     #[serde(skip_serializing_if = "Option::is_none")]
     pub top_logprobs: Option<u8>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tools: Option<Vec<Tool>>,
 }
 
 /// Common fields shared across different LLM provider chat completion responses

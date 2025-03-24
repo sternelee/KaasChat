@@ -63,6 +63,9 @@ pub fn run() {
             commands::update_prompt,
             commands::delete_prompt,
             commands::get_sys_info,
+            commands::list_tools,
+            commands::add_tool,
+            commands::remove_tool,
         ])
         .plugin(
             tauri_plugin_log::Builder::default()
