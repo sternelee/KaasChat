@@ -5,17 +5,18 @@ mod commands;
 mod core;
 mod errors;
 mod init;
-mod utils;
 mod log_utils;
 mod services;
+mod state;
+mod utils;
 
 use chrono::Local;
 use log::LevelFilter;
+use state::AppState;
 use tauri::Manager;
 use tauri_plugin_log::{
     fern::colors::{Color, ColoredLevelConfig},
-    Target, 
-    TargetKind,
+    Target, TargetKind,
 };
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -65,7 +66,10 @@ pub fn run() {
         ])
         .plugin(
             tauri_plugin_log::Builder::default()
-                .targets([Target::new(TargetKind::Stdout), Target::new(TargetKind::Webview)])
+                .targets([
+                    Target::new(TargetKind::Stdout),
+                    Target::new(TargetKind::Webview),
+                ])
                 .level(LevelFilter::Debug)
                 .format(move |out, message, record| {
                     out.finish(format_args!(
@@ -79,6 +83,7 @@ pub fn run() {
                 .build(),
         )
         .setup(|app| {
+            app.manage(AppState::new());
             // Open dev tools in debug builds
             #[cfg(debug_assertions)]
             {

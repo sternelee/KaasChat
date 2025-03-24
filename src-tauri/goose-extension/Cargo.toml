@@ -1,0 +1,26 @@
+[package]
+name = "goose-extension"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description.workspace = true
+
+[dependencies]
+anyhow = "1.0"
+mcp-core = { path = "../mcp-core" }
+mcp-client = { path = "../mcp-client" }
+mcp-server = { path = "../mcp-server" }
+goose-mcp = { path = "../goose-mcp" }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+chrono = { version = "0.4.38", features = ["serde"] }
+tokio = { version = "1.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+futures = "0.3"
+thiserror = "1.0"
+include_dir = "0.7.4"
+minijinja = "2.8.0"
+once_cell = "1.20.2"
