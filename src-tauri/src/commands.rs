@@ -454,14 +454,9 @@ pub async fn call_bot(
         context.insert(0, sys_m);
     }
     log::info!("bot calling context: {:?}", context);
+    let mut capabilities = state.capabilities.lock().await;
     // Get tools using lock() to get mutable access to capabilities
-    let mut tools = state
-        .capabilities
-        .lock()
-        .await
-        .get_prefixed_tools()
-        .await
-        .unwrap_or(vec![]);
+    let mut tools = capabilities.get_prefixed_tools().await.unwrap_or(vec![]);
 
     // TODO: make sure there is no collision with another extension's tool name
     let read_resource_tool = Tool::new(
@@ -502,10 +497,12 @@ pub async fn call_bot(
                     }),
                 );
 
-    if state.capabilities.lock().await.supports_resources() {
+    if capabilities.supports_resources() {
         tools.push(read_resource_tool);
         tools.push(list_resources_tool);
     }
+
+    let system_prompt = capabilities.get_system_prompt().await;
 
     // delegate to one-off or stream function to send request
     let is_stream_enabled = is_stream_enabled(&options);
@@ -811,14 +808,20 @@ pub async fn list_tools(state: State<'_, AppState>) -> CommandResult<Vec<String>
 
 #[tauri::command]
 pub async fn add_tool(state: State<'_, AppState>, tool: ExtensionConfig) -> CommandResult<()> {
+    log::info!("add_tool: {:?}", tool);
     let mut capabilities = state.capabilities.lock().await;
-    capabilities.add_extension(tool);
+    if let Err(e) = capabilities.add_extension(tool).await {
+        eprintln!("Failed to add extension: {}", e);
+    }
     Ok(())
 }
 
 #[tauri::command]
 pub async fn remove_tool(state: State<'_, AppState>, name: String) -> CommandResult<()> {
+    log::info!("remove_tool: {:?}", name);
     let mut capabilities = state.capabilities.lock().await;
-    capabilities.remove_extension(&name);
+    if let Err(e) = capabilities.remove_extension(&name).await {
+        eprintln!("Failed to add extension: {}", e);
+    }
     Ok(())
 }

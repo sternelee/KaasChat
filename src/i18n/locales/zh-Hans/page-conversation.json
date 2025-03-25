@@ -4,7 +4,9 @@
         "set-system-message": "为{{subject}}设置系统消息",
         "recent": "最近",
         "use-prompt": "使用prompt模板",
-        "change-options": "更改此对话的模型设置"
+        "change-options": "更改此对话的模型设置",
+        "tools": "工具",
+        "add-tool": "添加新工具"
     },
     "label": {
         "enter-to-send": "按回车发送",
@@ -20,7 +22,18 @@
         "presence-penalty": "Presence Penalty",
         "max-tokens": "最大tokens数量",
         "user": "用户",
-        "show-reasoning": "显示推理过程"
+        "show-reasoning": "显示推理过程",
+        "tool-id": "工具ID",
+        "tool-name": "工具名称",
+        "tool-description": "描述",
+        "tool-type": "类型",
+        "tool-timeout": "超时（秒）",
+        "tool-cmd": "命令",
+        "tool-uri": "URI",
+        "tool-enabled": "启用工具",
+        "type-builtin": "内置",
+        "type-cmd": "命令",
+        "type-uri": "URI"
     },
     "message": {
         "no-model": "你需要先选择一个模型",
@@ -37,6 +50,26 @@
         "insert-into-prompt": "插入prompt",
         "token-usage": "此消息消耗: {{usage}} tokens",
         "total-token-usage": "此对话共消耗: {{totalUsage}} tokens",
-        "change-options-tips": "更改选项可能会导致不可预测的行为和错误，请谨慎修改。"
+        "change-options-tips": "更改选项可能会导致不可预测的行为和错误，请谨慎修改。",
+        "tools-tips": "管理AI模型在对话中可以使用的工具。",
+        "add-tool-tips": "创建新的自定义工具供AI使用",
+        "tool-enabled-success": "工具已启用",
+        "tool-disabled-success": "工具已禁用",
+        "tool-deleted-success": "工具已删除",
+        "tool-delete-error-builtin": "内置工具无法删除",
+        "tool-validation-error": "工具ID和名称为必填项",
+        "tool-id-exists-error": "已存在使用此ID的工具",
+        "tool-added-success": "新工具已添加",
+        "tool-cmd-missing": "命令类型工具需要设置命令",
+        "tool-uri-missing": "URI类型工具需要设置URI",
+        "tool-sse-uri-missing": "SSE工具需要设置URI"
+    },
+    "option": {
+        "cmd": "命令",
+        "uri": "URI"
+    },
+    "action": {
+        "add-tool": "添加工具",
+        "save-tool": "保存工具"
     }
 }

@@ -1,4 +1,4 @@
-import { ImagePlus, Puzzle, SendHorizonal, Settings2, X } from 'lucide-react';
+import { ImagePlus, Puzzle, SendHorizonal, Settings2, X, PocketKnife } from 'lucide-react';
 import {
   forwardRef,
   useCallback,
@@ -32,6 +32,7 @@ import { ConversationOptionsDialog } from './ConversationOptionsDialog';
 import { ImagePreviwer } from './ImagePreviewer';
 import { ImageUploader } from './ImageUploader';
 import { PromptApplyDialog } from './PromptApplyDialog';
+import { ToolsDialog } from './ToolsDialog';
 import { Button } from './ui/button';
 import { Separator } from './ui/separator';
 import { Switch } from './ui/switch';
@@ -41,6 +42,7 @@ type Props = {
   enablePromptTemplate?: boolean;
   enableSetting?: boolean;
   enableOptions?: boolean;
+  enableTool?: boolean;
   showSendButton?: boolean;
   maxHeight?: number;
   defaultValue?: string;
@@ -57,6 +59,7 @@ const PromptInput = forwardRef<PromptInputHandler, Props>(
       enablePromptTemplate = true,
       enableSetting = true,
       enableOptions = true,
+      enableTool = true,
       showSendButton = true,
       maxHeight = MAX_HEIGHT,
       defaultValue,
@@ -76,6 +79,7 @@ const PromptInput = forwardRef<PromptInputHandler, Props>(
     const promptRef = useRef<HTMLTextAreaElement>(null);
     const promptGridDialogRef = useRef<DialogHandler<void>>(null);
     const optionsDialogRef = useRef<DialogHandler<void>>(null);
+    const toolsDialogRef = useRef<DialogHandler<void>>(null);
     const { t } = useTranslation(['generic', 'page-conversation']);
 
     // Queries
@@ -88,6 +92,10 @@ const PromptInput = forwardRef<PromptInputHandler, Props>(
 
     const onOpenOptionsClick = useCallback(() => {
       optionsDialogRef.current?.open();
+    }, []);
+
+    const onOpenToolsClick = useCallback(() => {
+      toolsDialogRef.current?.open();
     }, []);
 
     const onClick = useCallback(async () => {
@@ -241,6 +249,16 @@ const PromptInput = forwardRef<PromptInputHandler, Props>(
                 <Settings2 className="size-4" />
               </Button>
             ) : null}
+            {enableTool ? (
+              <Button
+                className="size-6 p-0"
+                variant="secondary"
+                onClick={onOpenToolsClick}
+                title={t('page-conversation:section:tools')}
+              >
+                <PocketKnife className="size-4" />
+              </Button>
+            ) : null}
           </div>
           <div className="flex w-full">
             <div className="my-auto grow">
@@ -283,6 +301,7 @@ const PromptInput = forwardRef<PromptInputHandler, Props>(
           ref={optionsDialogRef}
           conversation={conversation}
         />
+        <ToolsDialog ref={toolsDialogRef} />
       </>
     );
   }

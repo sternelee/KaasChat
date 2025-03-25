@@ -17,6 +17,7 @@ import type {
   RemoteModel,
   Setting,
   UpdateConversation,
+  ITool,
 } from './types';
 import {
   fromGenericChatOptions,
@@ -274,4 +275,36 @@ export async function invokeDeletePrompt(promptId: number): Promise<Prompt> {
 export async function invokeGetSysInfo(): Promise<Record<string, string>> {
   const result = await invoke<Record<string, string>>('get_sys_info');
   return result;
+}
+
+export async function invokeListTools(): Promise<ITool[]> {
+  const result = await invoke<ITool[]>('list_tools');
+  return result;
+}
+
+export async function invokeAddTool(tool: ITool): Promise<void> {
+  // 转换为后端ExpectConfig枚举格式
+  const extensionConfig = {
+    type: tool.type,
+    name: tool.name || tool.id,
+    ...(tool.type === 'stdio' ? {
+      cmd: tool.cmd || '',
+      args: tool.args || [],
+      timeout: tool.timeout
+    } : {}),
+    ...(tool.type === 'sse' ? {
+      uri: tool.uri || '',
+      timeout: tool.timeout
+    } : {}),
+    ...(tool.type === 'builtin' ? {
+      timeout: tool.timeout
+    } : {})
+  };
+
+  console.log('Adding tool with config:', extensionConfig);
+  await invoke<void>('add_tool', { tool: extensionConfig });
+}
+
+export async function invokeRemoveTool(name: string): Promise<void> {
+  await invoke<void>('remove_tool', { name });
 }

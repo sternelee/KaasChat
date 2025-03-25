@@ -4,7 +4,9 @@
         "set-system-message": "Set the system message for {{subject}}",
         "recent": "Recent",
         "use-prompt": "Use a prompt template",
-        "change-options": "Change model options of this conversation"
+        "change-options": "Change model options of this conversation",
+        "tools": "Tools",
+        "add-tool": "Add New Tool"
     },
     "label": {
         "enter-to-send": "Press Enter to send",
@@ -20,7 +22,18 @@
         "presence-penalty": "Presence Penalty",
         "max-tokens": "Max tokens",
         "user": "User",
-        "show-reasoning": "Show reasoning"
+        "show-reasoning": "Show reasoning",
+        "tool-id": "Tool ID",
+        "tool-name": "Tool Name",
+        "tool-description": "Description",
+        "tool-type": "Type",
+        "tool-timeout": "Timeout (seconds)",
+        "tool-cmd": "Command",
+        "tool-uri": "URI",
+        "tool-enabled": "Enable Tool",
+        "type-builtin": "Built-in",
+        "type-cmd": "Command",
+        "type-uri": "URI"
     },
     "message": {
         "no-model": "You need to choose a model first",
@@ -37,6 +50,26 @@
         "insert-into-prompt": "Insert into prompt",
         "token-usage": "Tokens used for this message: {{usage}}",
         "total-token-usage": "Tokens used for this conversation: {{totalUsage}}",
-        "change-options-tips": "Altering the options can cause unpredictable behaviors and even errors. Change with caution."
+        "change-options-tips": "Altering the options can cause unpredictable behaviors and even errors. Change with caution.",
+        "tools-tips": "Manage tools that can be used by AI models during conversations.",
+        "add-tool-tips": "Create a new custom tool for AI to use",
+        "tool-enabled-success": "Tool has been enabled",
+        "tool-disabled-success": "Tool has been disabled",
+        "tool-deleted-success": "Tool has been deleted",
+        "tool-delete-error-builtin": "Built-in tools cannot be deleted",
+        "tool-validation-error": "Tool ID and Name are required",
+        "tool-id-exists-error": "A tool with this ID already exists",
+        "tool-added-success": "New tool has been added",
+        "tool-cmd-missing": "Command is required for Command-type tools",
+        "tool-uri-missing": "URI is required for URI-type tools",
+        "tool-sse-uri-missing": "URI is required for SSE tools"
+    },
+    "option": {
+        "cmd": "Command",
+        "uri": "URI"
+    },
+    "action": {
+        "add-tool": "Add Tool",
+        "save-tool": "Save Tool"
     }
 }

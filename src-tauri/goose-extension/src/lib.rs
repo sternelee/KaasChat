@@ -10,8 +10,8 @@ use std::sync::LazyLock;
 use std::time::Duration;
 use tokio::sync::Mutex;
 use tracing::{debug, instrument};
-pub mod mcp;
 pub mod config;
+pub mod mcp;
 
 use config::{
     ExtensionConfig, ExtensionError, ExtensionInfo, ExtensionResult, DEFAULT_EXTENSION_TIMEOUT,

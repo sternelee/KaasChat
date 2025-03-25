@@ -335,3 +335,16 @@ export function toGenericConfig(config: RawConfig): GenericConfig {
     config: JSON.stringify(config),
   };
 }
+
+export type ITool = {
+  id: string;
+  name: string;
+  description?: string;
+  enabled?: boolean;
+  type: 'builtin' | 'stdio' | 'sse';
+  env_keys?: string[];
+  timeout?: number;
+  uri?: string;
+  cmd?: string;
+  args?: string[];
+}

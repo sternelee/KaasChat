@@ -1,11 +1,39 @@
 use std::collections::HashMap;
 
 use mcp_client::client::Error as ClientError;
+use mcp_core::handler::ToolResult;
+use mcp_core::tool::ToolCall;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
+mod tool_result_serde;
+
 pub const DEFAULT_EXTENSION: &str = "developer";
 pub const DEFAULT_EXTENSION_TIMEOUT: u64 = 300;
+
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ToolRequest {
+    pub id: String,
+    #[serde(with = "tool_result_serde")]
+    pub tool_call: ToolResult<ToolCall>,
+}
+
+impl ToolRequest {
+    pub fn to_readable_string(&self) -> String {
+        match &self.tool_call {
+            Ok(tool_call) => {
+                format!(
+                    "Tool: {}, Args: {}",
+                    tool_call.name,
+                    serde_json::to_string_pretty(&tool_call.arguments)
+                        .unwrap_or_else(|_| "<<invalid json>>".to_string())
+                )
+            }
+            Err(e) => format!("Invalid tool call: {}", e),
+        }
+    }
+}
 
 pub fn name_to_key(name: &str) -> String {
     name.chars()
